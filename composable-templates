@@ -1,0 +1,200 @@
+POST _index_template/orders_template
+{
+  "index_patterns": [
+    "*orders"
+  ],
+  "priority": 300,
+  "template": {
+    "mappings": {
+      "properties": {
+        "order_date": {
+          "type": "date",
+          "format":"dd-MM-yyyy"
+        }
+      }
+    },
+    "settings":{
+      "number_of_shards":5,
+      "number_of_replicas":2
+    },
+    "aliases":{
+      "all_orders":{}
+    }
+  }
+}
+PUT blackfriday_orders
+GET blackfriday_orders
+
+PUT americaorders
+GET americaorders
+
+PUT cancelled--orders
+GET cancelled--orders
+
+PUT undefined101orders
+GET undefined101orders
+
+
+# Doesn't get inherited
+PUT blackfriday_orders2
+PUT open_orders_
+PUT allorders_total
+
+# Searching in one go using an alias!
+
+GET blackfriday_orders,americaorders,undefined101orders/_search
+{
+  "query": {
+    "range": {
+      "order_date": {
+        "gte": "01-12-2021",
+        "lte": "31-12-2021"
+      }
+    }
+  }
+}
+
+# Using an alias
+GET all_orders/_search
+{
+  "query": {
+    "range": {
+      "order_date": {
+        "gte": "01-12-2021",
+        "lte": "31-12-2021"
+      }
+    }
+  }
+}
+
+POST _component_template/mapping_component_template
+{
+  "template": {
+    "mappings": {
+      "properties": {
+        "order_date": {
+          "type": "date",
+          "format":"dd-MM-yyyy"
+        }
+      }
+    }
+  }
+}
+
+POST _component_template/settings_component_template
+{
+  "template":{
+    "settings":{
+      "number_of_shards":5,
+      "number_of_replicas":2
+    }
+  }
+}
+
+POST _component_template/aliases_component_template
+{
+  "template": {
+    "aliases": {
+      "all_orders": {},
+      "sales_orders":{}
+    }
+  }
+}
+
+POST _index_template/composed_orders_template
+{
+  "index_patterns": [
+    "*orders"
+  ],
+  "priority": 500,
+  "composed_of": [
+    "settings_component_template",
+    "mapping_component_template",
+    "aliases_component_template"
+  ]
+}
+
+POST _component_template/aliases_component_template
+{
+  "template": {
+    "aliases": {
+      "all_customers": {}
+    }
+  }
+}
+# Index template
+POST _index_template/composed_customers_template
+{
+  "index_patterns": [
+    "*customers*"
+  ],
+  "priority": 200,
+  "composed_of": [
+    "settings_component_template",
+    "aliases_component_template"
+  ]
+}
+
+POST _index_template/_simulate/composed_customers_template
+
+PUT all_customers_2021
+GET all_customers_2021
+
+DELETE _index_template/composed_orders_template
+POST _index_template/composed_orders_template
+{
+  "index_patterns": ["*orders"], 
+  "priority": 200, 
+  "composed_of": ["dev_settings_component_template", "mapping_component_template"]
+}
+
+
+
+DELETE black_friday_orders
+PUT blackfriday_orders
+PUT black_friday2_orders
+PUT black_friday3_orders
+GET black_friday_orders
+
+PUT blackfriday_orders/_doc/1
+{
+  "id":"123",
+  "order_date":"15-12-2021"
+}
+
+PUT americaorders/_doc/1
+{
+  "id":"123",
+  "order_date":"20-12-2021"
+}
+
+
+
+GET all_orders/_search
+
+PUT black_fridayorders/_doc/2
+{
+  "id":"122",
+  "order_date":"14-12-2021"
+}
+
+GET black_fridayorders/_doc/2
+GET black_fridayorders/_search
+{
+  "query": {
+    "match": {
+      "order_state": "INITIAL"
+    }
+  }
+}
+
+
+GET black_friday_orders/_search
+{
+  "query": {
+    "match": {
+      "service_name.raw": "global"
+    }
+  }
+}
+
