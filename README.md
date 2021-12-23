@@ -1,1 +1,3 @@
-# articles
+# Articles
+
+1. Composable Templates
