@@ -1,0 +1,102 @@
+PUT my_index_with_stopwords
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "standard_with_stopwords":{ 
+          "type":"standard",
+          "stopwords":"_english_"
+        }
+      }
+    }
+  }
+}
+
+POST my_index_with_stopwords/_analyze
+{
+  "text": "Opster Ops is so cool 😎 and AWESOME 👍!!!",
+  "analyzer": "standard_with_stopwords"
+}
+
+PUT my_index_with_stopwords_german
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "standard_with_stopwords_german":{
+          "type":"standard",
+          "stopwords":"_german_" 
+        }
+      }
+    }
+  }
+}
+
+GET  my_index_with_stopwords_german/_analyze
+{
+  "text": ["Opster ist genial"],
+  "analyzer": "standard_with_stopwords_german"
+}
+
+PUT my_index_with_custom_analyzer
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "my_custom_analyzer":{
+          "type":"custom", 
+          "char_filter":["html_strip"],
+          "tokenizer":"standard",
+          "filter":["uppercase"]
+        }
+      }
+    }
+  }
+}
+
+POST my_index_with_custom_analyzer/_analyze
+{
+  "text": "<H1>opster ops is AwEsOmE</H1>",
+  "analyzer": "my_custom_analyzer"  
+}
+
+
+DELETE index_with_alpabet_words_custom_analyzer
+PUT index_with_alpabet_words_custom_analyzer
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "alphabet_word_custom_analyzer":{
+          "type":"custom",
+          "char_filter":["alphabet_word_mapper"],
+          "tokenizer":"standard",
+          "filter":["lowercase", "edge_ngrammer"] 
+        }
+      },
+      "char_filter": {
+        "alphabet_word_mapper":{ 
+          "type":"mapping",
+          "mappings":[
+            "a => apple",
+            "b => ball",
+            "c => cat"
+          ]
+        }
+      },
+      "filter": {
+        "edge_ngrammer":{ 
+          "type":"edge_ngram",
+          "min_gram":1,
+          "max_gram":5
+        }
+      }
+    }
+  }
+}
+
+POST index_with_alpabet_words_custom_analyzer/_analyze
+{
+  "text": "a",
+  "analyzer": "alphabet_word_custom_analyzer"
+}
